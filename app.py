@@ -13,32 +13,80 @@ import plotly.graph_objects as go
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
 
-# --- CSS UNTUK HEADER STICKY YANG AMAN (TIDAK TERTUTUP SIDEBAR) ---
+# --- CSS PREMIUM & PROFESSIONAL GLASSMORPHISM ---
 st.markdown(
     """
     <style>
-    /* Menggunakan sticky agar posisi mengikuti container utama (aman dari sidebar) */
+    /* Efek Kaca Melayang Premium (Glassmorphism) */
     .sticky-header {
         position: sticky;
-        top: -30px; /* Menempel tepat di bawah top-bar bawaan streamlit */
-        background-color: white;
+        top: -30px; 
         z-index: 99;
-        padding: 15px 0px;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #f0f2f6; /* Garis pembatas tipis yang elegan */
+        padding: 20px 25px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        
+        /* Warna latar belakang semi-transparan dengan efek blur di belakangnya */
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        
+        /* Border tipis dan bayangan halus berkelas */
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
     }
     
-    /* Menyesuaikan warna background di mode gelap */
+    /* Font Styling Khusus */
+    .main-title {
+        background: linear-gradient(45deg, #1e3c72, #2a5298);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        margin: 0;
+        padding: 0;
+        font-size: 2.3rem;
+    }
+    
+    .sub-title {
+        margin: 6px 0 0 0;
+        padding: 0;
+        font-size: 1.1rem;
+        color: #4a5568;
+        font-weight: 500;
+    }
+    
+    /* Penyesuaian Otomatis Kompatibel untuk Mode Gelap (Dark Mode) */
     @media (prefers-color-scheme: dark) {
         .sticky-header {
-            background-color: #0e1117;
-            border-bottom: 2px solid #262730;
+            background: rgba(14, 17, 23, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .main-title {
+            background: linear-gradient(45deg, #63b3ed, #4fd1c5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub-title {
+            color: #a0aec0;
         }
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# --- MENAMPILKAN JUDUL BERGAYA EXECUTIVE ---
+st.markdown(
+    """
+    <div class="sticky-header">
+        <h1 class="main-title">📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h1>
+        <p class="sub-title">Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # --- MENAMPILKAN JUDUL DALAM BLOK STICKY ---
 st.markdown(
