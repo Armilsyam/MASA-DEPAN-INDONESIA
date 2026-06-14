@@ -8,6 +8,8 @@ from itertools import islice
 from youtube_comment_downloader import YoutubeCommentDownloader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
+from wordcloud import WordCloud
+import plotly.express as px
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Scraper & Sentimen YouTube RI", layout="wide", page_icon="🇮🇩")
@@ -24,8 +26,7 @@ youtube_url = st.sidebar.text_input(
     help="Salin tautan penuh dari video YouTube yang ingin Anda bedah komentarnya."
 )
 
-# Slider didefinisikan satu kali di sini untuk mencegah StreamlitDuplicateElementId
-max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=10, max_value=1000000, value=100, step=10)
+max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=10, max_value=500, value=100, step=10)
 
 # --- FUNGSI EXTRACT VIDEO ID ---
 def get_video_id(url):
@@ -35,13 +36,9 @@ def get_video_id(url):
 
 # --- FUNGSI PARSING TANGGAL AMAN ---
 def parse_youtube_date(time_str):
-    """Mengubah teks waktu relatif YouTube atau format string menjadi objek datetime."""
     try:
-        # Jika format sudah standar, gunakan parser pandas langsung
         return pd.to_datetime(time_str)
     except Exception:
-        # Solusi untuk string format relatif ("22 hours ago", "3 days ago")
-        # Kita gunakan penanda waktu hari ini agar visualisasi tidak crash
         return pd.Timestamp.now()
 
 # --- ENGINE CRAWLING DATA ---
@@ -110,72 +107,117 @@ if youtube_url:
 
         st.markdown("---")
 
-        # --- VISUALISASI GRAFIK ---
-        left_chart, right_chart = st.columns(2)
+        # ====================================================================
+        # IDE 1 & 2: DONUT CHART (PEMBUKA) & WORD CLOUD (BEDAH KATA UTAMA)
+        # ====================================================================
+        col_donut, col_wordcloud = st.columns(2)
 
-        with left_chart:
-            st.subheader("📌 Distribusi Komparasi Sentimen")
-            fig, ax = plt.subplots(figsize=(6, 4))
-            sns.countplot(data=df_raw, x='Sentimen', palette='coolwarm', ax=ax)
-            plt.xticks(rotation=15)
-            st.pyplot(fig)
-
-        with right_chart:
-            st.subheader("📈 Pola Tren Berdasarkan Waktu Data")
-            df_sorted = df_raw.sort_values(by='Tanggal')
+        with col_donut:
+            st.subheader("🍩 1. Kondisi Umum Video (Donut Chart)")
+            sentiment_counts = df_raw['Sentimen'].value_counts().reset_index()
+            sentiment_counts.columns = ['Sentimen', 'Jumlah']
             
-            # Jika semua tanggal jatuh di hari yang sama (akibat format relatif), kita plot per jam
-            # Jika rentang hari berbeda, kita plot per tanggal
-            if df_sorted['Tanggal'].dt.date.nunique() <= 1:
-                df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.strftime('%H:%M')
+            # Skema warna khusus: Hijau untuk Optimis, Merah untuk Cemas, Abu-abu untuk Netral
+            color_map = {'Optimis (Positif)': '#2ecc71', 'Cemas (Negatif)': '#e74c3c', 'Netral/Ekspektatif': '#95a5a6'}
+            
+            fig_donut = px.pie(
+                sentiment_counts, 
+                values='Jumlah', 
+                names='Sentimen', 
+                hole=0.5,
+                color='Sentimen',
+                color_discrete_map=color_map
+            )
+            fig_donut.update_layout(margin=dict(t=20, b=20, l=20, r=20))
+            st.plotly_chart(fig_donut, use_container_width=True)
+
+        with col_wordcloud:
+            st.subheader("☁️ 2. Kata Kunci Dominan Penonton (Word Cloud)")
+            semua_teks = " ".join(df_raw['Komentar'].astype(str).tolist())
+            
+            # Membersihkan teks dari kata umum agar Word Cloud bermakna
+            for stop in ['yang', 'dan', 'di', 'untuk', 'bisa', 'kita', 'pak', 'ini', 'itu', 'ada', 'dari', 'ya', 'ga', 'aja', 'dgn', 'video']:
+                semua_teks = re.sub(r'\b' + stop + r'\b', '', semua_teks, flags=re.IGNORECASE)
+            
+            if len(semua_teks.strip()) > 0:
+                wordcloud = WordCloud(width=800, height=450, background_color='white', colormap='viridis').generate(semua_teks)
+                fig_wc, ax_wc = plt.subplots(figsize=(8, 4.5))
+                ax_wc.imshow(wordcloud, interpolation='bilinear')
+                ax_wc.axis('off')
+                st.pyplot(fig_wc)
             else:
-                df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.date
+                st.info("Teks tidak cukup untuk membangun Word Cloud.")
+
+        st.markdown("---")
+
+        # ====================================================================
+        # IDE 3: DINAMIKA LEWAT LINE GRAPH (TIME-SERIES)
+        # ====================================================================
+        st.subheader("📈 3. Dinamika Lonjakan Tren Opini (Line Graph)")
+        df_sorted = df_raw.sort_values(by='Tanggal')
+        
+        if df_sorted['Tanggal'].dt.date.nunique() <= 1:
+            df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.strftime('%H:%M')
+        else:
+            df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.date
+            
+        trend_df = df_sorted.groupby(['Waktu_Grup', 'Sentimen']).size().unstack(fill_value=0).reset_index()
+        
+        # Plot menggunakan Plotly Line agar interaktif (bisa di-hover untuk melihat waktu tepatnya)
+        fig_line = px.line(
+            trend_df, 
+            x='Waktu_Grup', 
+            y=trend_df.columns[1:], 
+            labels={'value': 'Jumlah Komentar', 'Waktu_Grup': 'Waktu Analisis'},
+            markers=True
+        )
+        st.plotly_chart(fig_line, use_container_width=True)
+
+        st.markdown("---")
+
+        # ====================================================================
+        # IDE 4: VALIDASI DENGAN BAR CHART KATEGORI BESAR
+        # ====================================================================
+        st.subheader("📊 4. Validasi Fokus Utama Komentar Penonton (Bar Chart)")
+        
+        # Rule-based sederhana untuk mengelompokkan komentar ke dalam 3 kategori besar keinginan user
+        def kategorisasi_komentar(teks):
+            teks = str(teks).lower()
+            if any(k in teks for k in ['kebijakan', 'isi', 'prabowo', 'presiden', 'program', 'makan', 'gizi', 'pajak', 'negara', 'ekonomi']):
+                return 'Isi Konten / Kebijakan Negara'
+            elif any(k in teks for k in ['kreator', 'admin', 'channel', 'gibran', 'tokoh', 'pemimpin', 'presiden']):
+                return 'Performa Tokoh / Kreator'
+            else:
+                return 'Kualitas Video / Pembahasan Umum'
                 
-            trend_df = df_sorted.groupby(['Waktu_Grup', 'Sentimen']).size().unstack(fill_value=0)
-            
-            fig, ax = plt.subplots(figsize=(8, 4.5))
-            for col in trend_df.columns:
-                ax.plot(trend_df.index.astype(str), trend_df[col], marker='o', label=col, linewidth=2)
-            plt.grid(True, linestyle='--', alpha=0.5)
-            plt.xticks(rotation=30)
-            plt.legend()
-            st.pyplot(fig)
+        df_raw['Kategori_Fokus'] = df_raw['Komentar'].apply(kategorisasi_komentar)
+        cat_counts = df_raw['Kategori_Fokus'].value_counts().reset_index()
+        cat_counts.columns = ['Kategori Fokus', 'Jumlah']
+        
+        fig_bar = px.bar(
+            cat_counts, 
+            x='Jumlah', 
+            y='Kategori Fokus', 
+            orientation='h', 
+            color='Kategori Fokus',
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
 
         st.markdown("---")
 
-        # --- KLASTER BERTIPOK (TOPIK UTAMA) ---
-        st.subheader("🗂️ Temuan Ragam Isu Utama Video (Konsep Bertipok)")
-        if len(df_raw) >= 5:
-            stop_words_id = ['yang', 'dan', 'di', 'untuk', 'bisa', 'kita', 'pak', 'ini', 'itu', 'ada', 'dari', 'ya', 'ga', 'aja', 'dgn']
-            vectorizer = TfidfVectorizer(max_features=500, stop_words=stop_words_id)
-            tfidf = vectorizer.fit_transform(df_raw['Komentar'])
-            
-            nmf = NMF(n_components=3, random_state=42)
-            nmf.fit(tfidf)
-            feature_names = vectorizer.get_feature_names_out()
-            
-            t_col1, t_col2, t_col3 = st.columns(3)
-            cols = [t_col1, t_col2, t_col3]
-            
-            for idx, topic in enumerate(nmf.components_):
-                top_words = [feature_names[i] for i in topic.argsort()[-4:]]
-                with cols[idx]:
-                    st.info(f"**Klaster Opini Ke-{idx+1}**\n\nKata Kunci Dominan: *{', '.join(top_words)}*")
-        else:
-            st.info("Jumlah narasi teks terlalu sedikit untuk memetakan klaster topik.")
-
-        # --- PREDIKSI STRATEGIS ---
-        st.markdown("---")
-        st.subheader("🔮 Prediksi & Konklusi Respons Netizen")
-        optimis_rate = (optimis_count / total_data) * 100 if total_data > 0 else 0
-
-        if optimis_rate > 50:
-            st.success(f"**PREDIKSI BERHASIL:** Video ini didominasi respons positif ({optimis_rate:.1f}%). Visi kebijakan masa depan yang dibahas dalam video YouTube ini diprediksi mendapat dukungan penuh publik secara digital.")
-        elif optimis_rate == 0 and cemas_count == 0:
-            st.warning("**PREDIKSI NETRAL:** Komentar didominasi oleh teks normatif/netral. Masyarakat digital cenderung bersikap memantau perkembangan situasi tanpa ekspresi emosi berlebih.")
-        else:
-            st.error(f"**PREDIKSI WASPADA:** Sentimen kecemasan/kritik tinggi. Narasi pada video ini berpotensi memicu gelombang kritik lebih besar di platform lain jika komunikasi publik pemerintah tidak segera diselaraskan.")
-
-        # --- TABEL DATA HASIL SCRAPING ---
-        with st.expander("Lihat Rincian Data Mentah Hasil Crawling"):
-            st.dataframe(df_raw[['Tanggal', 'Author', 'Komentar', 'Likes', 'Sentimen']])
+        # ====================================================================
+        # IDE 5: KESIMPULAN AKHIR MELALUI TREEMAP TOPIC WITH REAL COMMENTS
+        # ====================================================================
+        st.subheader("🗺️ 5. Peta Kesimpulan Topik & Contoh Komentar Riil (TreeMap)")
+        
+        # Membuat label ringkasan komentar singkat (max 40 karakter) sebagai contoh nyata di dalam kotak TreeMap
+        df_raw['Ringkasan_Komentar'] = df_raw['Komentar'].apply(lambda x: str(x)[:40] + '...' if len(str(x)) > 40 else str(x))
+        
+        # Menghitung count agregat agar plotly bisa merender ukuran bidang kotak secara proporsional
+        df_raw['Count'] = 1
+        
+        fig_treemap = px.treemap(
+            df_raw, 
+            path=['Kategori_Fokus', 'Sentimen', 'Ringkasan_Komentar'], 
+            values='Count',
