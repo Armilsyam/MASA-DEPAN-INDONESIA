@@ -215,18 +215,16 @@ if youtube_url:
 
         st.markdown("---")
 
-        # ====================================================================
-
-# ==========================================
-# 7. ROW 4: KESIMPULAN & SARAN MASUKAN PREDIKSI
+   # ==========================================
+# 7. COMPONENT 7: KESIMPULAN & SARAN MASUKAN DARI PREDIKSI
 # ==========================================
 st.markdown("---")
-st.subheader("🔮 Kesimpulan Otomatis & Prediksi Rekomendasi")
+st.subheader("🔮 Kesimpulan Otomatis & Prediksi Rekomendasi Jangka Panjang")
 
-# Kalkulasi ringkasan data untuk logika inferensi/prediksi
-total_pos = df_filtered[df_filtered['Sentimen'] == 'Positif']['Jumlah'].sum()
-total_neg = df_filtered[df_filtered['Sentimen'] == 'Negatif']['Jumlah'].sum()
-total_komentar = df_filtered['Jumlah'].sum()
+# Kalkulasi ringkasan data yang valid menggunakan df_raw
+total_komentar = len(df_raw)
+total_pos = (df_raw['Sentimen'] == 'Optimis (Positif)').sum()
+total_neg = (df_raw['Sentimen'] == 'Cemas (Negatif)').sum()
 rasio_positif = (total_pos / total_komentar) * 100 if total_komentar > 0 else 0
 
 # 1. TAMPILKAN METRIK PREDIKSI UTAMA
@@ -234,49 +232,53 @@ kpi1, kpi2, kpi3 = st.columns(3)
 
 with kpi1:
     st.metric(
-        label="Prediksi Skor Kesehatan Channel", 
+        label="Prediksi Stabilitas Sentimen Publik", 
         value=f"{rasio_positif:.1f}%", 
-        delta="Sangat Sehat" if rasio_positif > 60 else "Butuh Evaluasi",
-        delta_color="normal" if rasio_positif > 60 else "inverse"
+        delta="Kondisi Kondusif" if rasio_positif > 50 else "Butuh Intervensi Humas",
+        delta_color="normal" if rasio_positif > 50 else "inverse"
     )
 
 with kpi2:
-    # Mencari kategori dengan keluhan tertinggi
-    kategori_terburuk = df_filtered[df_filtered['Sentimen'] == 'Negatif'].groupby('Kategori')['Jumlah'].sum().idxmax()
+    # Mencari kategori dengan keluhan tertinggi secara aman
+    df_only_neg = df_raw[df_raw['Sentimen'] == 'Cemas (Negatif)']
+    if not df_only_neg.empty:
+        kategori_terburuk = df_only_neg.groupby('Kategori_Fokus').size().idxmax()
+    else:
+        kategori_terburuk = "Tidak Terdeteksi"
+        
     st.metric(
-        label="⚠️ Fokus Utama Perbaikan (Prediksi Risiko)", 
+        label="⚠️ Area Risiko Utama (Prediksi Resistensi)", 
         value=kategori_terburuk,
-        delta="Keluhan Tertinggi",
+        delta="Fokus Kritik Tertinggi",
         delta_color="inverse"
     )
 
 with kpi3:
-    # Menghitung estimasi pertumbuhan penonton berdasarkan sentimen positif
-    prediksi_subscribers = int(total_pos * 0.05) # Asumsi 5% komentator positif akan subscribe
+    # Proyeksi dampak viralitas berdasarkan akumulasi likes komentar optimis
+    total_likes_optimis = df_raw[df_raw['Sentimen'] == 'Optimis (Positif)']['Likes'].sum()
     st.metric(
-        label="📈 Proyeksi Konversi Subscriber Baru", 
-        value=f"+{prediksi_subscribers} User", 
-        delta="Berdasarkan Sentimen Positif"
+        label="📈 Estimasi Efek Amplifikasi Dukungan", 
+        value=f"+{total_likes_optimis} Interaksi", 
+        delta="Skor Resonansi Organik"
     )
 
-st.markdown("### 🎯 Saran Tindakan Nyata (Actionable Insights):")
+st.markdown("### 🎯 Saran Tindakan Nyata Berdasarkan Pemetaan Data:")
 
 # 2. LOGIKA PEMBERIAN SARAN SECARA DINAMIS
 col_saran1, col_saran2 = st.columns(2)
 
 with col_saran1:
-    st.info("💡 **Rekomendasi Konten Selanjutnya:**")
+    st.info("💡 **Rekomendasi Strategi Narasi / Konten Ke Depan:**")
     st.write(
-        f"Berdasarkan tingginya kata kunci positif pada visualisasi Word Cloud, penonton sangat menyukai elemen "
-        f"**Edukasi dan Gaya Penyampaian** Anda. Untuk video berikutnya, pertahankan gaya penjelasan yang lugas "
-        f"dan buatlah sekuel atau bagian kedua dari topik video ini guna mempertahankan keterikatan (*engagement*) audiens."
+        f"Berdasarkan visualisasi Word Cloud, audiens merespons sangat positif ketika pembahasan menyentuh kata-kata "
+        f"harapan pembangunan. Pertahankan penyajian data infografis konkret seputar program kerja nyata. "
+        f"Gunakan momentum tren waktu saat ini untuk menggandakan kuantitas publikasi narasi optimis tersebut."
     )
 
 with col_saran2:
-    st.warning("🛠️ **Rencana Perbaikan Teknis:**")
+    st.warning("🛠️ **Langkah Mitigasi Krisis & Isu Keluhan:**")
     st.write(
-        f"Data dari Heat Map menunjukkan adanya penumpukan sentimen negatif pada kategori **{kategori_terburuk}**. "
-        f"Penonton banyak mengeluhkan masalah teknis pada jam-jam utama penayangan video. "
-        f"Disarankan untuk melakukan pengecekan ulang (QC) kualitas sebelum publikasi, atau berikan pin komentar berisi permohonan maaf dan solusi instan."
+        f"Data grafik komparatif menunjukkan isu **{kategori_terburuk}** merupakan titik kumpul sentimen cemas terbesar. "
+        f"Disarankan bagi kreator atau tim komunikasi terkait untuk segera merilis materi klarifikasi, edukasi kebijakan, "
+        f"atau penyeimbang informasi guna meredam pergeseran opini negatif yang lebih meluas di area tersebut."
     )
-
