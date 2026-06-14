@@ -223,12 +223,6 @@ if youtube_url:
             st.metric("Sentimen Masa Depan Cemas 😟", f"{(cemas_count/total_data)*100:.1f}%" if total_data > 0 else "0%")
 
         st.markdown("---")
-
-        # Sisipkan ini setelah bagian judul atau metrik KPI utama
-tab1, tab2, tab3 = st.tabs(["📊 Ikhtisar & Kata Kunci", "📈 Analisis Tren & Waktu", "🔮 Rekomendasi Kebijakan"])
-
-with tab1:
-    # Masukkan kode Donut Chart dan Word Cloud di sini
     
         # ====================================================================
         # COMPONENT 1: PIE & DONUT CHART (RINGKASAN SEKEJAP)
@@ -248,9 +242,6 @@ with tab1:
         st.plotly_chart(fig_donut, use_container_width=True)
         st.markdown("---")
 
-    
-with tab2:
-    # Masukkan kode Linimasa dan Heat Map di sini
      # ====================================================================
         # COMPONENT 2: DUAL WORD CLOUD (HIJAU VS MERAH)
         # ====================================================================
@@ -292,9 +283,6 @@ with tab2:
                 st.info("Data teks negatif tidak mencukupi untuk Word Cloud.")
 
         st.markdown("---")
-
-with tab3:
-    # Masukkan kode Metrik Prediksi dan Saran Instansi di sini
        
         # ====================================================================
         # COMPONENT 3 & 4: TREN WAKTU & STACKED BAR CHART
