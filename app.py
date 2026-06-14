@@ -8,6 +8,7 @@ from itertools import islice
 from youtube_comment_downloader import YoutubeCommentDownloader
 from wordcloud import WordCloud
 import plotly.express as px
+import plotly.graph_objects as go
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
@@ -180,38 +181,149 @@ if youtube_url:
                 plt.close(fig_n)
             else:
                 st.info("Data teks negatif tidak mencukupi untuk Word Cloud.")
-                
+
         st.markdown("---")
 
         # ====================================================================
-        # COMPONENT 3: LINE GRAPH (TREN WAKTU) - SOLUSI GRAFIK KOSONG
+        # COMPONENT 3 & 4: TREN WAKTU & STACKED BAR CHART
         # ====================================================================
-        st.subheader("📈 3. Monitoring Emosi Jangka Panjang (Line Graph)")
-        df_sorted = df_raw.sort_values(by='Tanggal')
-        
-        # Proteksi waktu relatif: Jika seluruh tanggal sama (1 hari), kelompokkan per Jam:Menit agar garis terbentuk
-        if df_sorted['Tanggal'].dt.date.nunique() <= 1:
-            df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.strftime('%H:%M')
-        else:
-            df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.date.astype(str)
+        col_row2_left, col_row2_right = st.columns(2)
+
+        with col_row2_left:
+            st.subheader("📈 3. Linimasa Sentimen (Tren Waktu Harian)")
+            # Mengelompokkan tren berdasarkan tanggal murni (Y-M-D) tanpa jam untuk grafik garis yang mulus
+            df_raw['Tanggal_Hari'] = df_raw['Tanggal'].dt.date
+            df_timeline = df_raw.groupby(['Tanggal_Hari', 'Sentimen']).size().reset_index(name='Jumlah')
             
-        trend_df = df_sorted.groupby(['Waktu_Grup', 'Sentimen']).size().unstack(fill_value=0).reset_index()
-        
-        # Mencari kolom kategori sentimen yang ada untuk sumbu Y
-        kolom_y = [col for col in trend_df.columns if col != 'Waktu_Grup']
-        
-        fig_line = px.line(
-            trend_df, 
-            x='Waktu_Grup', 
-            y=kolom_y,
-            labels={'value': 'Volume Komentar', 'Waktu_Grup': 'Garis Waktu / Jam Posting'},
-            markers=True,
-            color_discrete_map=COLOR_MAP
-        )
-        st.plotly_chart(fig_line, use_container_width=True)
-        st.markdown("---")
+            fig_line = px.line(
+                df_timeline, x='Tanggal_Hari', y='Jumlah', color='Sentimen',
+                color_discrete_map=COLOR_MAP, markers=True
+            )
+            fig_line.update_layout(hovermode="x unified", margin=dict(t=20, b=20, l=20, r=20))
+            st.plotly_chart(fig_line, use_container_width=True)
 
+        with col_row2_right:
+            st.subheader("📊 4. Distribusi Sentimen per Kategori Fokus (Stacked Bar Chart)")
+            df_bar = df_raw.groupby(['Kategori_Fokus', 'Sentimen']).size().reset_index(name='Jumlah')
+            
+            fig_bar = px.bar(
+                df_bar, x='Kategori_Fokus', y='Jumlah', color='Sentimen',
+                barmode='stack', color_discrete_map=COLOR_MAP
+            )
+            fig_bar.update_layout(margin=dict(t=20, b=20, l=20, r=20))
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        st.markdown("---")
         # ====================================================================
-        # COMPONENT 4: STACKED BAR CHART
+        # COMPONENT 7: KESIMPULAN & REKOMENDASI KEBIJAKAN PEMERINTAHAN (RE-ENGINEERED)
         # ====================================================================
-        st.subheader("📊 4. Komparasi Sentimen per Klaster Isu (Stacked Bar Chart)")
+        st.markdown("---")
+        st.subheader("🔮 Kesimpulan Otomatis & Analisis Prediktif Rekomendasi Pemerintahan")
+        st.markdown(" Menyajikan ringkasan eksekutif dan rekomendasi taktis berbasis data untuk pengambil keputusan (Policy Makers).")
+
+        # 1. Kalkulasi Parameter Parameter Utama
+        total_komentar = len(df_raw)
+        total_pos = (df_raw['Sentimen'] == 'Optimis (Positif)').sum()
+        total_neg = (df_raw['Sentimen'] == 'Cemas (Negatif)').sum()
+        rasio_optimis = (total_pos / total_komentar) * 100 if total_komentar > 0 else 0
+
+        # Identifikasi kluster isu yang paling krusial bagi publik
+        df_only_neg = df_raw[df_raw['Sentimen'] == 'Cemas (Negatif)']
+        if not df_only_neg.empty:
+            isu_risiko = df_only_neg.groupby('Kategori_Fokus').size().idxmax()
+            jumlah_keluhan_isu_ini = df_only_neg[df_only_neg['Kategori_Fokus'] == isu_risiko].shape[0]
+            persentase_keluhan_isu = (jumlah_keluhan_isu_ini / total_neg) * 100
+        else:
+            isu_risiko = "Tidak Terdeteksi"
+            persentase_keluhan_isu = 0
+
+        total_likes_optimis = df_raw[df_raw['Sentimen'] == 'Optimis (Positif)']['Likes'].sum()
+
+        # 2. TAMPILKAN METRIK UTAMA BERBASIS KPI PEMERINTAHAN
+        kpi_gov1, kpi_gov2, kpi_gov3 = st.columns(3)
+
+        with kpi_gov1:
+            # Mengukur tingkat penerimaan (Approval Rating) publik digital
+            status_stabilitas = "Kondusif & Stabil" if rasio_optimis >= 55 else "Risiko Defisit Kepercayaan"
+            st.metric(
+                label="📊 Proyeksi Indeks Penerimaan Publik (Approval Rating)", 
+                value=f"{rasio_optimis:.1f}%", 
+                delta=status_stabilitas,
+                delta_color="normal" if rasio_optimis >= 55 else "inverse"
+            )
+
+        with kpi_gov2:
+            # Mengisolasi titik sumbat komunikasi publik terbesar
+            st.metric(
+                label="⚠️ Alarm Krisis (Titik Kritik Tertinggi)", 
+                value=isu_risiko,
+                delta=f"{persentase_keluhan_isu:.1f}% dari Total Komentar Negatif",
+                delta_color="inverse"
+            )
+
+        with kpi_gov3:
+            # Mengukur kekuatan 'organic amplifier' atau pendukung kebijakan di kolom komentar
+            st.metric(
+                label="📢 Skor Resonansi Narasi Positif (Aktivitas Likes)", 
+                value=f"{total_likes_optimis} Reaksi", 
+                delta="Dukungan Publik Organik"
+            )
+
+        # 3. LOGIKA FORMULASI REKOMENDASI DINAMIS BERDASARKAN HASIL DATA
+        st.markdown("### 🎯 Lembar Rekomendasi Taktis Instansi Pemerintahan:")
+        col_gov_saran1, col_gov_saran2 = st.columns(2)
+
+        with col_gov_saran1:
+            st.info("🏛️ **1. Rekomendasi Strategi Komunikasi Publik (Humas / Kemkominfo):**")
+            
+            # Logika dinamis untuk Humas berdasarkan tingkat Approval Rating
+            if rasio_optimis < 40:
+                st.write(
+                    f"🚨 **STATUS DARURAT KOMUNIKASI.** Sentimen optimis berada di bawah angka 40%. "
+                    f"Narasi publik saat ini didominasi oleh misinformasi atau ketidakpastian. "
+                    f"**Tindakan:** Tim Humas Pemerintah harus segera melakukan *Counter-Narrative* massal. "
+                    f"Hentikan sementara kampanye satu arah (Top-Down). Buka ruang dialog interaktif seperti "
+                    f"Live Q&A bersama menteri atau tokoh kunci di YouTube/Media Sosial untuk menjawab keraguan netizen secara transparan."
+                )
+            elif 40 <= rasio_optimis < 60:
+                st.write(
+                    f"⚠️ **STATUS WASPADA TRANSISI.** Opini publik masih terbelah seimbang. "
+                    f"Kelompok *Ekspektatif (Netral)* sangat mendominasi dan bisa bergeser menjadi negatif jika salah langkah. "
+                    f"**Tindakan:** Masifkan penyusunan materi infografis dan video pendek (Shorts/TikTok) yang membedah keuntungan konkret dari kebijakan Presiden Prabowo. "
+                    f"Fokuskan pada visualisasi alur manfaat langsung yang diterima masyarakat bawah."
+                )
+            else:
+                st.write(
+                    f"🟢 **STATUS AMAN & SUPORTIF.** Tingkat kepercayaan publik sangat tinggi. "
+                    f"**Tindakan:** Kapitalisasi sentimen ini dengan memanfaatkan komentar-komentar positif yang memiliki "
+                    f"banyak *likes* (`{total_likes_optimis} Reaksi`) untuk dijadikan testimoni digital resmi. "
+                    f"Gunakan momentum ini untuk mengamplifikasi program kerja turunan tanpa hambatan resistensi digital."
+                )
+
+        with col_gov_saran2:
+            st.warning("🛠️ **2. Rekomendasi Kebijakan Riil (Kementerian & Lembaga Terkait):**")
+            
+            # Logika dinamis berdasarkan rumpun isu yang paling banyak dikritik publik
+            if isu_risiko == "Kebijakan & Ekonomi":
+                st.write(
+                    f"📈 **FOKUS ISU: EKONOMI & REGULASI NEGARA.** Netizen mengekspresikan kecemasan tinggi pada sub-topik "
+                    f"anggaran, pajak, program pangan, atau stabilitas harga bahan pokok. "
+                    f"**Tindakan Struktural:** Disarankan kepada Kementerian Koordinator Bidang Perekonomian dan Kementerian Keuangan "
+                    f"untuk meninjau kembali variabel komunikasi dari penyesuaian tarif instrumen fiskal. Katup pengaman sosial "
+                    f"(seperti subsidi tepat sasaran atau bantuan gizi) harus dipastikan terdistribusi 100% tepat waktu "
+                    f"sebelum pengumuman regulasi makro dilakukan ke publik, guna menghindari gejolak penolakan sipil digital."
+                )
+            elif isu_risiko == "Performa Tokoh":
+                st.write(
+                    f"👤 **FOKUS ISU: LEGITIMASI & PERFORMA KEPEMIMPINAN.** Kritik berpusat pada penugasan kabinet atau figuritas penanggung jawab program. "
+                    f"**Tindakan Struktural:** Diperlukan penegakan KPI (Key Performance Indicator) kementerian yang lebih terbuka kepada publik. "
+                    f"Presiden disarankan memperkuat penegasan komitmen pemberantasan kebocoran anggaran negara dan hukum secara periodik "
+                    f"untuk menjaga integritas serta wibawa politik pemerintahan baru di mata netizen."
+                )
+            else:
+                st.write(
+                    f"💬 **FOKUS ISU: PEMBAHASAN UMUM & DINAMIKA SOSIAL.** Keluhan tersebar di berbagai aspek non-struktural. "
+                    f"**Tindakan Struktural:** Tetap lakukan monitoring berkala menggunakan alat ukur analitik ini. "
+                    f"Secara umum, masyarakat masih memantau proses implementasi tahap awal, sehingga fokus utama "
+                    f"adalah menjaga stabilitas pelayanan publik dasar agar tidak terjadi blunder operasional di lapangan."
+                )
