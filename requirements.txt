@@ -1,6 +1,9 @@
 streamlit
 pandas
+numpy
 matplotlib
 seaborn
 scikit-learn
 youtube-comment-downloader
+wordcloud
+plotly
