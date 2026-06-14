@@ -128,7 +128,7 @@ youtube_url = st.sidebar.text_input(
     help="Salin tautan penuh dari video YouTube yang ingin Anda bedah komentarnya."
 )
 
-max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=20, max_value=500, value=150, step=10)
+max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=20, max_value=100000, value=150, step=10)
 
 # --- FUNGSI EXTRACT VIDEO ID ---
 def get_video_id(url):
