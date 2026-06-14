@@ -10,7 +10,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from wordcloud import WordCloud
 import plotly.express as px
-import plotly.graph_objects as go
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
@@ -120,9 +119,9 @@ if youtube_url:
         with col1:
             st.metric("Total Komentar Diekstrak", f"{total_data} data")
         with col2:
-            st.metric("Sentimen Optimis 👍 (Hijau)", f"{(optimis_count/total_data)*100:.1f}%" if total_data > 0 else "0%")
+            st.metric("Sentimen Masa Depan Optimis 👍", f"{(optimis_count/total_data)*100:.1f}%" if total_data > 0 else "0%")
         with col3:
-            st.metric("Sentimen Cemas 😟 (Merah)", f"{(cemas_count/total_data)*100:.1f}%" if total_data > 0 else "0%")
+            st.metric("Sentimen Masa Depan Cemas 😟", f"{(cemas_count/total_data)*100:.1f}%" if total_data > 0 else "0%")
 
         st.markdown("---")
 
@@ -147,7 +146,7 @@ if youtube_url:
         # ====================================================================
         # COMPONENT 2: DUAL WORD CLOUD (HIJAU VS MERAH)
         # ====================================================================
-        st.subheader("☁️ 2. Komparasi Kata Kunci Dominan Audiler (Dual Word Cloud)")
+        st.subheader("☁️ 2. Komparasi Kata Kunci Dominan Audiens (Dual Word Cloud)")
         col_wc_pos, col_wc_neg = st.columns(2)
         
         stop_words_id = ['yang', 'dan', 'di', 'untuk', 'bisa', 'kita', 'pak', 'ini', 'itu', 'ada', 'dari', 'ya', 'ga', 'aja', 'dgn', 'video', 'he', 'si']
