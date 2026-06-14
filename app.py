@@ -13,9 +13,52 @@ import plotly.graph_objects as go
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
 
-st.title("📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia")
-st.subheader("Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto")
+# --- CSS UNTUK HEADER STICKY (TETAP DI ATAS SAAT SCROLL) ---
+st.markdown(
+    """
+    <style>
+    /* Membuat kontainer header melayang di atas */
+    .sticky-header {
+        position: fixed;
+        top: 2.875rem; /* Menyesuaikan dengan batas atas default Streamlit */
+        left: 0;
+        width: 100%;
+        background-color: white; /* Beri latar belakang putih agar tulisan di bawahnya tidak menabrak */
+        z-index: 999;
+        padding: 10px 50px;
+        box-shadow: 0px 2px 10px rgba(0,0,0,0.1); /* Efek bayangan tipis agar estetis */
+    }
+    
+    /* Memberikan jarak kosong di bawah header agar konten grafik pertama tidak tertutup */
+    .header-spacer {
+        margin-top: 130px; 
+    }
+    
+    /* Menyesuaikan warna teks di mode gelap (opsional, untuk fleksibilitas tema) */
+    @media (prefers-color-scheme: dark) {
+        .sticky-header {
+            background-color: #0e1117;
+            box-shadow: 0px 2px 10px rgba(255,255,255,0.05);
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- MENAMPILKAN JUDUL DALAM BLOK STICKY ---
+st.markdown(
+    """
+    <div class="sticky-header">
+        <h2 style='margin:0; padding:0;'>📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h2>
+        <p style='margin:5px 0 0 0; padding:0; font-size:1.1rem; color:#666;'>Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto</p>
+    </div>
+    <div class="header-spacer"></div>
+    """,
+    unsafe_allow_html=True
+)
 st.markdown("---")
+
 
 # --- KONSISTENSI WARNA STATIS ---
 COLOR_MAP = {'Optimis (Positif)': '#2ecc71', 'Cemas (Negatif)': '#e74c3c', 'Netral/Ekspektatif': '#95a5a6'}
