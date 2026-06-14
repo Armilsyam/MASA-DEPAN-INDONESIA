@@ -10,45 +10,44 @@ from wordcloud import WordCloud
 import plotly.express as px
 import plotly.graph_objects as go
 
-# --- KONFIGURASI HALAMAN ---
+# --- 1. KONFIGURASI HALAMAN (Wajib Paling Atas) ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
 
-# --- CSS PREMIUM GLOBAL BACKGROUND & GLASSMORPHISM ---
+# --- 2. CSS GLOBAL MODERN & PREMIUM BACKGROUND ---
 st.markdown(
     """
     <style>
-    /* 1. MENGUBAH WARNA LATAR BELAKANG SELURUH HALAMAN (GLOBAL) */
+    /* Mengubah warna latar belakang seluruh halaman */
     .stApp {
-        background-color: #f4f6f9; /* Abu-abu terang premium, bukan putih polos kaku */
+        background-color: #f4f6f9; 
     }
     
-    /* 2. KUSTOMISASI SIDEBAR AGAR KONTRAS */
+    /* Kustomisasi Sidebar Gelap yang Kontras */
     [data-testid="stSidebar"] {
-        background-color: #1e293b !important; /* Biru gelap charcoal yang sangat pro */
+        background-color: #1e293b !important; 
     }
-    [data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4, [data-testid="stSidebar"] h5, [data-testid="stSidebar"] h6 {
-        color: #f8fafc !important; /* Teks di sidebar menjadi putih bersih */
+    [data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3 {
+        color: #f8fafc !important; 
     }
     
-    /* 3. EFEK KACA MELAYANG PREMIUM UNTUK JUDUL (GLASSMORPHISM) */
+    /* Efek Kaca Melayang (Glassmorphism) untuk Kontainer Judul */
     .sticky-header {
         position: sticky;
         top: -30px; 
         z-index: 99;
         padding: 20px 25px;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
         border-radius: 16px;
-        
-        /* Background semi-transparan yang kontras dengan latar belakang baru */
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        
         border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 10px 30px 0 rgba(15, 23, 42, 0.05);
+        box-shadow: 0 10px 30px 0 rgba(15, 23, 42, 0.04);
     }
     
-    /* Font Styling Khusus */
+    /* Desain Tipografi Judul */
     .main-title {
         background: linear-gradient(45deg, #0f172a, #2563eb);
         -webkit-background-clip: text;
@@ -56,7 +55,7 @@ st.markdown(
         font-weight: 800;
         margin: 0;
         padding: 0;
-        font-size: 2.3rem;
+        font-size: 2.2rem;
     }
     
     .sub-title {
@@ -67,10 +66,10 @@ st.markdown(
         font-weight: 500;
     }
     
-    /* 4. OTOMATIS BERUBAH MENJADI DARK MODE KORPORAT JIKA USER MENGGUNAKAN TEMPLATE GELAP */
+    /* Mode Gelap Otomatis (Dark Mode) */
     @media (prefers-color-scheme: dark) {
         .stApp {
-            background-color: #0f172a; /* Latar belakang hitam kebiruan (Midnight Blue) */
+            background-color: #0f172a; 
         }
         [data-testid="stSidebar"] {
             background-color: #0b0f19 !important;
@@ -90,17 +89,6 @@ st.markdown(
         }
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- MENAMPILKAN JUDUL BERGAYA EXECUTIVE ---
-st.markdown(
-    """
-    <div class="sticky-header">
-        <h1 class="main-title">📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h1>
-        <p class="sub-title">Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto</p>
-    </div>
     """,
     unsafe_allow_html=True
 )
