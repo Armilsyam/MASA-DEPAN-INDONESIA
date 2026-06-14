@@ -19,7 +19,7 @@ st.markdown("---")
 st.sidebar.header("📥 Pengaturan Komponen Crawling")
 youtube_url = st.sidebar.text_input(
     "Masukkan Link Video YouTube:",
-    value="https://youtube.com", # Ganti dengan link video berita Prabowo
+    value="https://youtu.be/iN-xiHnZPQ0?si=TynkOxkeoXX9qOZU", # Ganti dengan link video berita Prabowo
     help="Salin tautan penuh dari video YouTube yang ingin Anda bedah komentarnya."
 )
 
