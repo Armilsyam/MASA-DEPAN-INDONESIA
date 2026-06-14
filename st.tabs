@@ -1,0 +1,11 @@
+# Sisipkan ini setelah bagian judul atau metrik KPI utama
+tab1, tab2, tab3 = st.tabs(["📊 Ikhtisar & Kata Kunci", "📈 Analisis Tren & Waktu", "🔮 Rekomendasi Kebijakan"])
+
+with tab1:
+    # Masukkan kode Donut Chart dan Word Cloud di sini
+    
+with tab2:
+    # Masukkan kode Linimasa dan Heat Map di sini
+    
+with tab3:
+    # Masukkan kode Metrik Prediksi dan Saran Instansi di sini
