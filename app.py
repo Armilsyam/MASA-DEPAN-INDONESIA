@@ -13,32 +13,44 @@ import plotly.graph_objects as go
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
 
-# --- CSS PREMIUM & PROFESSIONAL GLASSMORPHISM ---
+# --- CSS PREMIUM GLOBAL BACKGROUND & GLASSMORPHISM ---
 st.markdown(
     """
     <style>
-    /* Efek Kaca Melayang Premium (Glassmorphism) */
+    /* 1. MENGUBAH WARNA LATAR BELAKANG SELURUH HALAMAN (GLOBAL) */
+    .stApp {
+        background-color: #f4f6f9; /* Abu-abu terang premium, bukan putih polos kaku */
+    }
+    
+    /* 2. KUSTOMISASI SIDEBAR AGAR KONTRAS */
+    [data-testid="stSidebar"] {
+        background-color: #1e293b !important; /* Biru gelap charcoal yang sangat pro */
+    }
+    [data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] h4, [data-testid="stSidebar"] h5, [data-testid="stSidebar"] h6 {
+        color: #f8fafc !important; /* Teks di sidebar menjadi putih bersih */
+    }
+    
+    /* 3. EFEK KACA MELAYANG PREMIUM UNTUK JUDUL (GLASSMORPHISM) */
     .sticky-header {
         position: sticky;
         top: -30px; 
         z-index: 99;
         padding: 20px 25px;
         margin-bottom: 25px;
-        border-radius: 12px;
+        border-radius: 16px;
         
-        /* Warna latar belakang semi-transparan dengan efek blur di belakangnya */
-        background: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        /* Background semi-transparan yang kontras dengan latar belakang baru */
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         
-        /* Border tipis dan bayangan halus berkelas */
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 10px 30px 0 rgba(15, 23, 42, 0.05);
     }
     
     /* Font Styling Khusus */
     .main-title {
-        background: linear-gradient(45deg, #1e3c72, #2a5298);
+        background: linear-gradient(45deg, #0f172a, #2563eb);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
@@ -51,27 +63,44 @@ st.markdown(
         margin: 6px 0 0 0;
         padding: 0;
         font-size: 1.1rem;
-        color: #4a5568;
+        color: #475569;
         font-weight: 500;
     }
     
-    /* Penyesuaian Otomatis Kompatibel untuk Mode Gelap (Dark Mode) */
+    /* 4. OTOMATIS BERUBAH MENJADI DARK MODE KORPORAT JIKA USER MENGGUNAKAN TEMPLATE GELAP */
     @media (prefers-color-scheme: dark) {
+        .stApp {
+            background-color: #0f172a; /* Latar belakang hitam kebiruan (Midnight Blue) */
+        }
+        [data-testid="stSidebar"] {
+            background-color: #0b0f19 !important;
+        }
         .sticky-header {
-            background: rgba(14, 17, 23, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.3);
         }
         .main-title {
-            background: linear-gradient(45deg, #63b3ed, #4fd1c5);
+            background: linear-gradient(45deg, #38bdf8, #818cf8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .sub-title {
-            color: #a0aec0;
+            color: #94a3b8;
         }
     }
     </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- MENAMPILKAN JUDUL BERGAYA EXECUTIVE ---
+st.markdown(
+    """
+    <div class="sticky-header">
+        <h1 class="main-title">📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h1>
+        <p class="sub-title">Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto</p>
+    </div>
     """,
     unsafe_allow_html=True
 )
