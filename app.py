@@ -79,7 +79,7 @@ if youtube_url:
     if df_raw.empty:
         st.error("Gagal mengekstrak komentar. Pastikan format link YouTube benar dan video tersebut memiliki komentar publik.")
     else:
-        # --- ENGINE ANALISIS SENTIMEN SIMPEL ---
+        # --- ENGINE ANALISIS SENTIMEN ---
         optimis_words = {'optimis', 'cerah', 'maju', 'berhasil', 'mandiri', 'terjamin', 'modal', 'bagus', 'sehat', 'hebat', 'nyata', 'tangguh', 'mantap', 'setuju', 'dukung', 'presiden'}
         cemas_words = {'khawatir', 'suram', 'susah', 'meroket', 'bengkak', 'turun', 'berat', 'ancaman', 'sulit', 'utang', 'melonjak', 'beban', 'kecewa', 'mahal', 'rugi', 'pajak'}
 
@@ -184,7 +184,7 @@ if youtube_url:
         st.markdown("---")
 
         # ====================================================================
-        # COMPONENT 3: LINE GRAPH (TREN WAKTU) - SOLUSI PROTEKSI GRAFIK KOSONG
+        # COMPONENT 3: LINE GRAPH (TREN WAKTU) - SOLUSI GRAFIK KOSONG
         # ====================================================================
         st.subheader("📈 3. Monitoring Emosi Jangka Panjang (Line Graph)")
         df_sorted = df_raw.sort_values(by='Tanggal')
@@ -196,6 +196,8 @@ if youtube_url:
             df_sorted['Waktu_Grup'] = df_sorted['Tanggal'].dt.date.astype(str)
             
         trend_df = df_sorted.groupby(['Waktu_Grup', 'Sentimen']).size().unstack(fill_value=0).reset_index()
+        
+        # Mencari kolom kategori sentimen yang ada untuk sumbu Y
         kolom_y = [col for col in trend_df.columns if col != 'Waktu_Grup']
         
         fig_line = px.line(
