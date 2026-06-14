@@ -1,0 +1,9 @@
+# Di dalam area sidebar Anda, bungkus seperti ini:
+with st.sidebar.form(key="crawler_form"):
+    youtube_url = st.text_input("Masukkan Link Video YouTube:", value="https://youtube.com")
+    max_comments = st.slider("Jumlah Maksimal Komentar:", min_value=20, max_value=500, value=150)
+    submit_button = st.form_submit_button(label="🚀 Mulai Analisis Data")
+
+# Eksekusi hanya jika submit_button ditekan
+if submit_button or youtube_url:
+    # Jalankan engine crawl_youtube_comments disini
