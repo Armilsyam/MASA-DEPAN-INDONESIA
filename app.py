@@ -6,8 +6,6 @@ import seaborn as sns
 import re
 from itertools import islice
 from youtube_comment_downloader import YoutubeCommentDownloader
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import NMF
 from wordcloud import WordCloud
 import plotly.express as px
 
@@ -162,11 +160,11 @@ if youtube_url:
             pos_texts = dapatkan_clean_string(df_raw[df_raw['Sentimen'] == 'Optimis (Positif)']['Komentar'])
             if len(pos_texts.strip()) > 5:
                 wc_pos = WordCloud(width=600, height=350, background_color='white', colormap='Greens').generate(pos_texts)
-                fig, ax = plt.subplots()
-                ax.imshow(wc_pos, interpolation='bilinear')
-                ax.axis('off')
-                st.pyplot(fig)
-                plt.close(fig)
+                fig_p, ax_p = plt.subplots()
+                ax_p.imshow(wc_pos, interpolation='bilinear')
+                ax_p.axis('off')
+                st.pyplot(fig_p)
+                plt.close(fig_p)
             else:
                 st.info("Data teks positif tidak mencukupi untuk Word Cloud.")
 
@@ -175,11 +173,11 @@ if youtube_url:
             neg_texts = dapatkan_clean_string(df_raw[df_raw['Sentimen'] == 'Cemas (Negatif)']['Komentar'])
             if len(neg_texts.strip()) > 5:
                 wc_neg = WordCloud(width=600, height=350, background_color='white', colormap='Reds').generate(neg_texts)
-                fig, ax = plt.subplots()
-                ax.imshow(wc_neg, interpolation='bilinear')
-                ax.axis('off')
-                st.pyplot(fig)
-                plt.close(fig)
+                fig_n, ax_n = plt.subplots()
+                ax_n.imshow(wc_neg, interpolation='bilinear')
+                ax_n.axis('off')
+                st.pyplot(fig_n)
+                plt.close(fig_n)
             else:
                 st.info("Data teks negatif tidak mencukupi untuk Word Cloud.")
                 
@@ -197,10 +195,13 @@ if youtube_url:
             
         trend_df = df_sorted.groupby(['Waktu_Grup', 'Sentimen']).size().unstack(fill_value=0).reset_index()
         
+        # Menyederhanakan penentuan kolom y untuk menghindari unclosed parentheses
+        kolom_y = [col for col in trend_df.columns if col != 'Waktu_Grup']
+        
         fig_line = px.line(
             trend_df, 
             x='Waktu_Grup', 
-            y=[c for c in trend_df.columns if c != 'Waktu_Grup'],
+            y=kolom_y,
             labels={'value': 'Volume Komentar', 'Waktu_Grup': 'Garis Waktu'},
             markers=True,
             color_discrete_map=COLOR_MAP
@@ -214,6 +215,4 @@ if youtube_url:
         st.subheader("📊 4. Komparasi Sentimen per Klaster Isu (Stacked Bar Chart)")
         stacked_df = df_raw.groupby(['Kategori_Fokus', 'Sentimen']).size().unstack(fill_value=0).reset_index()
         
-        fig_stacked = px.bar(
-            stacked_df, 
-            x='Kategori_Fokus', 
+        kolom_y_stacked = [col for col in stacked_df.columns if col != 'Kategori_Fokus']
