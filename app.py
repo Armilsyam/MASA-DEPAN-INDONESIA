@@ -224,6 +224,12 @@ if youtube_url:
 
         st.markdown("---")
 
+        # Sisipkan ini setelah bagian judul atau metrik KPI utama
+tab1, tab2, tab3 = st.tabs(["📊 Ikhtisar & Kata Kunci", "📈 Analisis Tren & Waktu", "🔮 Rekomendasi Kebijakan"])
+
+with tab1:
+    # Masukkan kode Donut Chart dan Word Cloud di sini
+    
         # ====================================================================
         # COMPONENT 1: PIE & DONUT CHART (RINGKASAN SEKEJAP)
         # ====================================================================
@@ -242,7 +248,10 @@ if youtube_url:
         st.plotly_chart(fig_donut, use_container_width=True)
         st.markdown("---")
 
-        # ====================================================================
+    
+with tab2:
+    # Masukkan kode Linimasa dan Heat Map di sini
+     # ====================================================================
         # COMPONENT 2: DUAL WORD CLOUD (HIJAU VS MERAH)
         # ====================================================================
         st.subheader("☁️ 2. Komparasi Kata Kunci Dominan Audiens (Dual Word Cloud)")
@@ -284,6 +293,9 @@ if youtube_url:
 
         st.markdown("---")
 
+with tab3:
+    # Masukkan kode Metrik Prediksi dan Saran Instansi di sini
+       
         # ====================================================================
         # COMPONENT 3 & 4: TREN WAKTU & STACKED BAR CHART
         # ====================================================================
