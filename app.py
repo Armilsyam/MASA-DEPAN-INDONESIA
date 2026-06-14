@@ -39,23 +39,33 @@ def crawl_youtube_comments(url, limit):
     if not video_id:
         return pd.DataFrame()
     
-    downloader = YoutubeCommentDownloader()
-    # Mengambil generator komentar dari library youtube-comment-downloader
-    comments_generator = downloader.get_comments_from_video(video_id, sort_by=0) # 0 = Populer, 1 = Terbaru
-    
-    # Ambil data sesuai limit batasan slider
-    sliced_comments = islice(comments_generator, limit)
-    
-    data_list = []
-    for comment in sliced_comments:
-        data_list.append({
-            'Tanggal': pd.to_datetime(comment['time']),
-            'Komentar': comment['text'],
-            'Author': comment['author'],
-            'Likes': comment['votes']
-        })
+    try:
+        downloader = YoutubeCommentDownloader()
         
-    return pd.DataFrame(data_list)
+        # PERBAIKAN: Menggunakan metode get_comments dan parameter sort_by yang sesuai dokumentasi terbaru
+        # sort_by=0 untuk Terpopuler, sort_by=1 untuk Terbaru
+        comments_generator = downloader.get_comments(youtube_id=video_id, sort_by=0) 
+        
+        # Ambil data sesuai limit batasan slider
+        sliced_comments = islice(comments_generator, limit)
+        
+        data_list = []
+        for comment in sliced_comments:
+            # Mengonversi waktu agar aman jika format timestamp berbeda
+            time_val = comment.get('time', pd.Timestamp.now())
+            
+            data_list.append({
+                'Tanggal': pd.to_datetime(time_val),
+                'Komentar': comment.get('text', ''),
+                'Author': comment.get('author', 'Anonim'),
+                'Likes': comment.get('votes', 0)
+            })
+            
+        return pd.DataFrame(data_list)
+        
+    except Exception as e:
+        st.error(f"Terjadi kesalahan teknis saat crawling: {e}")
+        return pd.DataFrame()
 
 # --- PROSES EKSEKUSI DATA ---
 if youtube_url:
