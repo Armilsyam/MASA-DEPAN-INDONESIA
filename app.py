@@ -25,7 +25,7 @@ youtube_url = st.sidebar.text_input(
 )
 
 # Slider didefinisikan satu kali di sini untuk mencegah StreamlitDuplicateElementId
-max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=10, max_value=500, value=100, step=10)
+max_comments = st.sidebar.slider("Jumlah Maksimal Komentar:", min_value=10, max_value=1000000, value=100, step=10)
 
 # --- FUNGSI EXTRACT VIDEO ID ---
 def get_video_id(url):
