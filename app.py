@@ -13,32 +13,26 @@ import plotly.graph_objects as go
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dasbor Sentimen RI Interaktif", layout="wide", page_icon="🇮🇩")
 
-# --- CSS UNTUK HEADER STICKY (TETAP DI ATAS SAAT SCROLL) ---
+# --- CSS UNTUK HEADER STICKY YANG AMAN (TIDAK TERTUTUP SIDEBAR) ---
 st.markdown(
     """
     <style>
-    /* Membuat kontainer header melayang di atas */
+    /* Menggunakan sticky agar posisi mengikuti container utama (aman dari sidebar) */
     .sticky-header {
-        position: fixed;
-        top: 2.875rem; /* Menyesuaikan dengan batas atas default Streamlit */
-        left: 0;
-        width: 100%;
-        background-color: white; /* Beri latar belakang putih agar tulisan di bawahnya tidak menabrak */
-        z-index: 999;
-        padding: 10px 50px;
-        box-shadow: 0px 2px 10px rgba(0,0,0,0.1); /* Efek bayangan tipis agar estetis */
+        position: sticky;
+        top: -30px; /* Menempel tepat di bawah top-bar bawaan streamlit */
+        background-color: white;
+        z-index: 99;
+        padding: 15px 0px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f0f2f6; /* Garis pembatas tipis yang elegan */
     }
     
-    /* Memberikan jarak kosong di bawah header agar konten grafik pertama tidak tertutup */
-    .header-spacer {
-        margin-top: 130px; 
-    }
-    
-    /* Menyesuaikan warna teks di mode gelap (opsional, untuk fleksibilitas tema) */
+    /* Menyesuaikan warna background di mode gelap */
     @media (prefers-color-scheme: dark) {
         .sticky-header {
             background-color: #0e1117;
-            box-shadow: 0px 2px 10px rgba(255,255,255,0.05);
+            border-bottom: 2px solid #262730;
         }
     }
     </style>
@@ -50,15 +44,13 @@ st.markdown(
 st.markdown(
     """
     <div class="sticky-header">
-        <h2 style='margin:0; padding:0;'>📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h2>
+        <h1 style='margin:0; padding:0; font-size:2.2rem;'>📊 Dasbor Analisis Sentimen & Tren Masa Depan Indonesia</h1>
         <p style='margin:5px 0 0 0; padding:0; font-size:1.1rem; color:#666;'>Peta Opini Netizen Jangka Panjang Terhadap Kepemimpinan Presiden Prabowo Subianto</p>
     </div>
-    <div class="header-spacer"></div>
     """,
     unsafe_allow_html=True
 )
-st.markdown("---")
-
+# (Catatan: Hapus bagian `header-spacer` lama karena posisi sticky sudah otomatis mengatur jarak)
 
 # --- KONSISTENSI WARNA STATIS ---
 COLOR_MAP = {'Optimis (Positif)': '#2ecc71', 'Cemas (Negatif)': '#e74c3c', 'Netral/Ekspektatif': '#95a5a6'}
